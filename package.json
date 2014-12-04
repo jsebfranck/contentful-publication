@@ -10,7 +10,8 @@
   "contributors": [
     {
       "name": "Jean-Sébastien FRANCK"
-    }, {
+    },
+    {
       "name": "Jérémy VINAI"
     }
   ],
@@ -22,5 +23,8 @@
     "nano": "5.7.1",
     "q": "^1.1.2",
     "questor": "git://github.com/ehd/questor#v1.0.0-alpha.3"
+  },
+  "devDependencies": {
+    "nock": "^0.51.0"
   }
 }
