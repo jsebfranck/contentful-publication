@@ -63,7 +63,7 @@ describe('Content publication', function() {
   });
 
 
-  it.only('should update an to the unsynchronized space', function(done) {
+  it('should update an to the unsynchronized space', function(done) {
 
     nock('https://cdn.contentful.com:443')
      .get('/spaces/d3ivyl5chrsd/sync?initial=true')
