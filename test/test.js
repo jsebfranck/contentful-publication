@@ -31,7 +31,7 @@ describe('Content publication', function () {
     createEmptyTokenFile();
   });
 
-  it('should do nothing if there are no entries to synchronize', function () {
+  it('should do nothing if there are no contents to synchronize', function () {
     nock('https://cdn.contentful.com:443')
       .get('/spaces/d3ivyl5chrsd/sync?initial=true')
       .reply(200, {"sys": {"type": "Array"}, "items": [],
@@ -77,7 +77,6 @@ describe('Content publication', function () {
 
 
   it('should update an entry on the unsynchronized space', function (done) {
-
     nock('https://cdn.contentful.com:443')
       .get('/spaces/d3ivyl5chrsd/sync?initial=true')
       .reply(200, {"sys": {"type": "Array"}, "items": [
@@ -131,6 +130,41 @@ describe('Content publication', function () {
     nock('https://api.contentful.com:443')
       .delete('/spaces/2udq9e16iv3p/entries/26GRGDvgvyQ0cswwMscCIc?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
       .reply(204, "");
+
+    var sync = Sync.fromConfig(config);
+    sync.verbose = true;
+    sync.run().then(function () {
+      done();
+    }).catch(function (err) {
+      done(err);
+    });
+  });
+
+  it('should add an asset on a unsynchronized space', function (done) {
+    createEmptyTokenFile();
+
+    nock('https://cdn.contentful.com:443')
+      .get('/spaces/d3ivyl5chrsd/sync?initial=true')
+      .reply(200, {"sys": {"type": "Array"}, "items": [
+        {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/d3ivyl5chrsd/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Asset", "id": "9WwNj5BjrOwawsOuAIIce", "revision": 1, "createdAt": "2014-12-04T16:46:25.594Z", "updatedAt": "2014-12-04T16:46:25.594Z"}}
+      ],
+        "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
+
+    nock('https://api.contentful.com:443')
+      .get('/spaces/2udq9e16iv3p?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
+      .reply(200, {"sys": {"type": "Space", "id": "2udq9e16iv3p", "version": 1, "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "createdAt": "2014-12-02T15:46:22Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "updatedAt": "2014-12-02T15:46:22Z"}, "name": "Xebia2"});
+
+    nock('https://api.contentful.com:443')
+      .get('/spaces/2udq9e16iv3p/assets/9WwNj5BjrOwawsOuAIIce?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
+      .reply(404, {"sys": {"type": "Error", "id": "NotFound"}, "message": "The resource could not be found.", "details": {"type": "Asset", "space": "2udq9e16iv3p", "id": "9WwNj5BjrOwawsOuAIIce"}});
+
+    nock('https://api.contentful.com:443')
+      .put('/spaces/2udq9e16iv3p/assets/9WwNj5BjrOwawsOuAIIce?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702', {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/d3ivyl5chrsd/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Asset", "id": "9WwNj5BjrOwawsOuAIIce", "revision": 1, "createdAt": "2014-12-04T16:46:25.594Z", "updatedAt": "2014-12-04T16:46:25.594Z"}})
+      .reply(201, {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/d3ivyl5chrsd/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"id": "9WwNj5BjrOwawsOuAIIce", "type": "Asset", "version": 1, "createdAt": "2014-12-04T16:47:12.954Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "2udq9e16iv3p"}}, "updatedAt": "2014-12-04T16:47:12.954Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
+
+    nock('https://api.contentful.com:443')
+      .put('/spaces/2udq9e16iv3p/assets/9WwNj5BjrOwawsOuAIIce/published?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
+      .reply(200, {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/d3ivyl5chrsd/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"id": "9WwNj5BjrOwawsOuAIIce", "type": "Asset", "createdAt": "2014-12-04T16:47:12.954Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "2udq9e16iv3p"}}, "version": 2, "updatedAt": "2014-12-04T16:47:13.693Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T16:47:13.693Z", "publishedCounter": 1, "publishedAt": "2014-12-04T16:47:13.693Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
 
     var sync = Sync.fromConfig(config);
     sync.verbose = true;
