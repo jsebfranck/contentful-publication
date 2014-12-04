@@ -1,0 +1,9 @@
+{
+  "verbose": true,
+  "contentful": {
+    "accessToken": "",
+    "spaceSource": "",
+    "accessTokenDestination": "",
+    "spaceDestination": ""
+  }
+}

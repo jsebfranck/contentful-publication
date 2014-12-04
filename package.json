@@ -1,0 +1,26 @@
+{
+  "name": "contentful-publication",
+  "version": "0.0.1",
+  "description": "Allow to synchronize space content with another space",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jsebfranck/contentful-publication.git"
+  },
+  "contributors": [
+    {
+      "name": "Jean-Sébastien FRANCK"
+    }, {
+      "name": "Jérémy VINAI"
+    }
+  ],
+  "dependencies": {
+    "bluebird": "~0.11.6-0",
+    "contentful-management": "^0.1.1",
+    "lodash": "2.4.1",
+    "minimist": "0.0.8",
+    "nano": "5.7.1",
+    "q": "^1.1.2",
+    "questor": "git://github.com/ehd/questor#v1.0.0-alpha.3"
+  }
+}
