@@ -31,15 +31,29 @@ describe('Content publication', function () {
     createEmptyTokenFile();
   });
 
-  it('should do nothing if there are no contents to synchronize', function () {
+  var publishContent = function(done) {
+    var sync = Sync.fromConfig(config);
+    sync.verbose = true;
+    sync.run().then(function () {
+      done();
+    }).catch(function (err) {
+      done(err);
+    });
+  };
+
+  var expectToGetDestinationSpace = function() {
+    nock('https://api.contentful.com:443')
+      .get('/spaces/2udq9e16iv3p?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
+      .reply(200, {"sys": {"type": "Space", "id": "2udq9e16iv3p", "version": 1, "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "createdAt": "2014-12-02T15:46:22Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "updatedAt": "2014-12-02T15:46:22Z"}, "name": "Xebia2"});
+  };
+
+  it('should do nothing if there are no contents to synchronize', function (done) {
     nock('https://cdn.contentful.com:443')
       .get('/spaces/d3ivyl5chrsd/sync?initial=true')
       .reply(200, {"sys": {"type": "Array"}, "items": [],
         "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
 
-    var sync = Sync.fromConfig(config);
-    sync.verbose = true;
-    sync.run().done();
+    publishContent(done);
   });
 
   it('should add new entry to the unsynchronized space', function (done) {
@@ -50,9 +64,7 @@ describe('Content publication', function () {
       ],
         "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
 
-    nock('https://api.contentful.com:443')
-      .get('/spaces/2udq9e16iv3p?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
-      .reply(200, {"sys": {"type": "Space", "id": "2udq9e16iv3p", "version": 1, "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "createdAt": "2014-12-02T15:46:22Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "updatedAt": "2014-12-02T15:46:22Z"}, "name": "Xebia2"});
+    expectToGetDestinationSpace();
 
     nock('https://api.contentful.com:443')
       .get('/spaces/2udq9e16iv3p/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
@@ -66,13 +78,7 @@ describe('Content publication', function () {
       .put('/spaces/2udq9e16iv3p/entries/2XS1ZMB87KSWAI4o6aOw0G/published?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
       .reply(200, {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "2udq9e16iv3p"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "version": 2, "updatedAt": "2014-12-04T14:16:59.193Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 1, "publishedAt": "2014-12-04T14:16:59.193Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
 
-    var sync = Sync.fromConfig(config);
-    sync.verbose = true;
-    sync.run().then(function () {
-      done();
-    }).catch(function (err) {
-        done(err);
-      });
+    publishContent(done);
   });
 
 
@@ -84,9 +90,7 @@ describe('Content publication', function () {
       ],
         "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
 
-    nock('https://api.contentful.com:443')
-      .get('/spaces/2udq9e16iv3p?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
-      .reply(200, {"sys": {"type": "Space", "id": "2udq9e16iv3p", "version": 1, "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "createdAt": "2014-12-02T15:46:22Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "updatedAt": "2014-12-02T15:46:22Z"}, "name": "Xebia2"});
+    expectToGetDestinationSpace();
 
     nock('https://api.contentful.com:443')
       .get('/spaces/2udq9e16iv3p/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
@@ -100,13 +104,7 @@ describe('Content publication', function () {
       .put('/spaces/2udq9e16iv3p/entries/2XS1ZMB87KSWAI4o6aOw0G/published?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
       .reply(200, {"fields": {"contentfulTitle": {"en-US": "12"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "2udq9e16iv3p"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 2, "publishedAt": "2014-12-04T14:44:31.005Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 3, "version": 4, "updatedAt": "2014-12-04T14:44:31.005Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
 
-    var sync = Sync.fromConfig(config);
-    sync.verbose = true;
-    sync.run().then(function () {
-      done();
-    }).catch(function (err) {
-        done(err);
-      });
+    publishContent(done);
   });
 
   it('should remove an entry on a synchronized space', function (done) {
@@ -119,9 +117,7 @@ describe('Content publication', function () {
       ],
         "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEW-SYNC-TOKEN"});
 
-    nock('https://api.contentful.com:443')
-      .get('/spaces/2udq9e16iv3p?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
-      .reply(200, {"sys": {"type": "Space", "id": "2udq9e16iv3p", "version": 1, "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "createdAt": "2014-12-02T15:46:22Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "updatedAt": "2014-12-02T15:46:22Z"}, "name": "Xebia2"});
+    expectToGetDestinationSpace();
 
     nock('https://api.contentful.com:443')
       .delete('/spaces/2udq9e16iv3p/entries/26GRGDvgvyQ0cswwMscCIc/published?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
@@ -131,13 +127,7 @@ describe('Content publication', function () {
       .delete('/spaces/2udq9e16iv3p/entries/26GRGDvgvyQ0cswwMscCIc?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
       .reply(204, "");
 
-    var sync = Sync.fromConfig(config);
-    sync.verbose = true;
-    sync.run().then(function () {
-      done();
-    }).catch(function (err) {
-        done(err);
-      });
+    publishContent(done);
   });
 
   it('should add an asset on a unsynchronized space', function (done) {
@@ -149,9 +139,7 @@ describe('Content publication', function () {
       ],
         "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
 
-    nock('https://api.contentful.com:443')
-      .get('/spaces/2udq9e16iv3p?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
-      .reply(200, {"sys": {"type": "Space", "id": "2udq9e16iv3p", "version": 1, "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "createdAt": "2014-12-02T15:46:22Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "updatedAt": "2014-12-02T15:46:22Z"}, "name": "Xebia2"});
+    expectToGetDestinationSpace();
 
     nock('https://api.contentful.com:443')
       .get('/spaces/2udq9e16iv3p/assets/9WwNj5BjrOwawsOuAIIce?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
@@ -165,13 +153,7 @@ describe('Content publication', function () {
       .put('/spaces/2udq9e16iv3p/assets/9WwNj5BjrOwawsOuAIIce/published?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
       .reply(200, {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/d3ivyl5chrsd/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"id": "9WwNj5BjrOwawsOuAIIce", "type": "Asset", "createdAt": "2014-12-04T16:47:12.954Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "2udq9e16iv3p"}}, "version": 2, "updatedAt": "2014-12-04T16:47:13.693Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T16:47:13.693Z", "publishedCounter": 1, "publishedAt": "2014-12-04T16:47:13.693Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
 
-    var sync = Sync.fromConfig(config);
-    sync.verbose = true;
-    sync.run().then(function () {
-      done();
-    }).catch(function (err) {
-        done(err);
-      });
+    publishContent(done);
   });
 
   it('should update an asset on a unsynchronized space', function (done) {
@@ -182,9 +164,7 @@ describe('Content publication', function () {
         {"fields": {"file": {"en-US": {"fileName": "2014_03_05_XEBIA_16_FINAL_1.jpg", "contentType": "image/jpeg", "details": {"image": {"width": 4791, "height": 2695}, "size": 7378737}, "url": "//images.contentful.com/d3ivyl5chrsd/1P3ydRWdSwcmEIQkeGySAo/975718ead2ad44d685075d46f349f18a/2014_03_05_XEBIA_16_FINAL_1.jpg"}}, "title": {"en-US": "Xebia 2"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Asset", "id": "1P3ydRWdSwcmEIQkeGySAo", "revision": 2, "createdAt": "2014-12-05T08:31:14.547Z", "updatedAt": "2014-12-08T13:33:04.774Z"}}
       ], "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=w5ZGw6JFwqZmVcKsE8Kow4grw45QdybDo8KowpbChcKUw6DDl1ElWw94wobCusKMwo8fwrnDk2bDpsKYJcOQEcOSLHZoVyDCgMOFwofDn8KdNsKudxNLw6RSwrlhSHIpbsO3wrfCo8KEH8KQwrVFLF3CssOLwoZuBw"});
 
-    nock('https://api.contentful.com:443')
-      .get('/spaces/2udq9e16iv3p?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
-      .reply(200, {"sys": {"type": "Space", "id": "2udq9e16iv3p", "version": 1, "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "createdAt": "2014-12-02T15:46:22Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "updatedAt": "2014-12-02T15:46:22Z"}, "name": "Xebia2"});
+    expectToGetDestinationSpace();
 
     nock('https://api.contentful.com:443')
       .get('/spaces/2udq9e16iv3p/assets/1P3ydRWdSwcmEIQkeGySAo?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
@@ -198,13 +178,7 @@ describe('Content publication', function () {
       .put('/spaces/2udq9e16iv3p/assets/1P3ydRWdSwcmEIQkeGySAo/published?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
       .reply(200, {"fields": {"file": {"en-US": {"fileName": "2014_03_05_XEBIA_16_FINAL_1.jpg", "contentType": "image/jpeg", "details": {"image": {"width": 4791, "height": 2695}, "size": 7378737}, "url": "//images.contentful.com/d3ivyl5chrsd/1P3ydRWdSwcmEIQkeGySAo/975718ead2ad44d685075d46f349f18a/2014_03_05_XEBIA_16_FINAL_1.jpg"}}, "title": {"en-US": "Xebia 2"}}, "sys": {"id": "1P3ydRWdSwcmEIQkeGySAo", "type": "Asset", "createdAt": "2014-12-05T09:29:24.883Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "2udq9e16iv3p"}}, "firstPublishedAt": "2014-12-05T09:29:25.562Z", "publishedCounter": 6, "publishedAt": "2014-12-08T13:46:35.122Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 11, "version": 12, "updatedAt": "2014-12-08T13:46:35.122Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
 
-    var sync = Sync.fromConfig(config);
-    sync.verbose = true;
-    sync.run().then(function () {
-      done();
-    }).catch(function (err) {
-        done(err);
-      });
+    publishContent(done);
   });
 
   it('should remove an asset on a synchronized space', function (done) {
