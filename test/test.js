@@ -47,22 +47,29 @@ describe('Content publication', function () {
       .reply(200, {"sys": {"type": "Space", "id": "2udq9e16iv3p", "version": 1, "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "createdAt": "2014-12-02T15:46:22Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "updatedAt": "2014-12-02T15:46:22Z"}, "name": "Xebia2"});
   };
 
-  it('should do nothing if there are no contents to synchronize', function (done) {
+  var expectToGetSourceItemsWithInitialSync = function(items) {
     nock('https://cdn.contentful.com:443')
       .get('/spaces/d3ivyl5chrsd/sync?initial=true')
-      .reply(200, {"sys": {"type": "Array"}, "items": [],
+      .reply(200, {"sys": {"type": "Array"}, "items": items,
         "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
+  };
 
+  var expectToGetSourceItemsWithExistingSync = function(items) {
+    nock('https://cdn.contentful.com:443')
+      .get('/spaces/d3ivyl5chrsd/sync?sync_token=SYNC_TOKEN')
+      .reply(200, {"sys": {"type": "Array"}, "items": items,
+        "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEW-SYNC-TOKEN"});
+  };
+
+  it('should do nothing if there are no contents to synchronize', function (done) {
+    expectToGetSourceItemsWithInitialSync([]);
     publishContent(done);
   });
 
   it('should add new entry to the unsynchronized space', function (done) {
-    nock('https://cdn.contentful.com:443')
-      .get('/spaces/d3ivyl5chrsd/sync?initial=true')
-      .reply(200, {"sys": {"type": "Array"}, "items": [
-        {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "2XS1ZMB87KSWAI4o6aOw0G", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"}, "fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}}
-      ],
-        "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
+    expectToGetSourceItemsWithInitialSync([
+      {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "2XS1ZMB87KSWAI4o6aOw0G", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"}, "fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}}
+    ]);
 
     expectToGetDestinationSpace();
 
@@ -83,12 +90,9 @@ describe('Content publication', function () {
 
 
   it('should update an entry on the unsynchronized space', function (done) {
-    nock('https://cdn.contentful.com:443')
-      .get('/spaces/d3ivyl5chrsd/sync?initial=true')
-      .reply(200, {"sys": {"type": "Array"}, "items": [
-        {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "2XS1ZMB87KSWAI4o6aOw0G", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"}, "fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}}
-      ],
-        "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
+    expectToGetSourceItemsWithInitialSync([
+      {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "2XS1ZMB87KSWAI4o6aOw0G", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"}, "fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}}
+    ]);
 
     expectToGetDestinationSpace();
 
@@ -110,12 +114,9 @@ describe('Content publication', function () {
   it('should remove an entry on a synchronized space', function (done) {
     createTokenFileWithToken();
 
-    nock('https://cdn.contentful.com:443')
-      .get('/spaces/d3ivyl5chrsd/sync?sync_token=SYNC_TOKEN')
-      .reply(200, {"sys": {"type": "Array"}, "items": [
-        {"sys": {"type": "DeletedEntry", "id": "26GRGDvgvyQ0cswwMscCIc", "space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "revision": 1, "createdAt": "2014-12-04T16:07:55.783Z", "updatedAt": "2014-12-04T16:07:55.783Z", "deletedAt": "2014-12-04T16:07:55.783Z"}}
-      ],
-        "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEW-SYNC-TOKEN"});
+    expectToGetSourceItemsWithExistingSync([
+      {"sys": {"type": "DeletedEntry", "id": "26GRGDvgvyQ0cswwMscCIc", "space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "revision": 1, "createdAt": "2014-12-04T16:07:55.783Z", "updatedAt": "2014-12-04T16:07:55.783Z", "deletedAt": "2014-12-04T16:07:55.783Z"}}
+    ]);
 
     expectToGetDestinationSpace();
 
@@ -132,12 +133,9 @@ describe('Content publication', function () {
 
   it('should add an asset on a unsynchronized space', function (done) {
 
-    nock('https://cdn.contentful.com:443')
-      .get('/spaces/d3ivyl5chrsd/sync?initial=true')
-      .reply(200, {"sys": {"type": "Array"}, "items": [
-        {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/d3ivyl5chrsd/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Asset", "id": "9WwNj5BjrOwawsOuAIIce", "revision": 1, "createdAt": "2014-12-04T16:46:25.594Z", "updatedAt": "2014-12-04T16:46:25.594Z"}}
-      ],
-        "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEXT-SYNC-TOKEN"});
+    expectToGetSourceItemsWithInitialSync([
+      {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/d3ivyl5chrsd/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Asset", "id": "9WwNj5BjrOwawsOuAIIce", "revision": 1, "createdAt": "2014-12-04T16:46:25.594Z", "updatedAt": "2014-12-04T16:46:25.594Z"}}
+    ]);
 
     expectToGetDestinationSpace();
 
@@ -158,11 +156,9 @@ describe('Content publication', function () {
 
   it('should update an asset on a unsynchronized space', function (done) {
 
-    nock('https://cdn.contentful.com:443')
-      .get('/spaces/d3ivyl5chrsd/sync?initial=true')
-      .reply(200, {"sys": {"type": "Array"}, "items": [
-        {"fields": {"file": {"en-US": {"fileName": "2014_03_05_XEBIA_16_FINAL_1.jpg", "contentType": "image/jpeg", "details": {"image": {"width": 4791, "height": 2695}, "size": 7378737}, "url": "//images.contentful.com/d3ivyl5chrsd/1P3ydRWdSwcmEIQkeGySAo/975718ead2ad44d685075d46f349f18a/2014_03_05_XEBIA_16_FINAL_1.jpg"}}, "title": {"en-US": "Xebia 2"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Asset", "id": "1P3ydRWdSwcmEIQkeGySAo", "revision": 2, "createdAt": "2014-12-05T08:31:14.547Z", "updatedAt": "2014-12-08T13:33:04.774Z"}}
-      ], "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=w5ZGw6JFwqZmVcKsE8Kow4grw45QdybDo8KowpbChcKUw6DDl1ElWw94wobCusKMwo8fwrnDk2bDpsKYJcOQEcOSLHZoVyDCgMOFwofDn8KdNsKudxNLw6RSwrlhSHIpbsO3wrfCo8KEH8KQwrVFLF3CssOLwoZuBw"});
+    expectToGetSourceItemsWithInitialSync([
+      {"fields": {"file": {"en-US": {"fileName": "2014_03_05_XEBIA_16_FINAL_1.jpg", "contentType": "image/jpeg", "details": {"image": {"width": 4791, "height": 2695}, "size": 7378737}, "url": "//images.contentful.com/d3ivyl5chrsd/1P3ydRWdSwcmEIQkeGySAo/975718ead2ad44d685075d46f349f18a/2014_03_05_XEBIA_16_FINAL_1.jpg"}}, "title": {"en-US": "Xebia 2"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "type": "Asset", "id": "1P3ydRWdSwcmEIQkeGySAo", "revision": 2, "createdAt": "2014-12-05T08:31:14.547Z", "updatedAt": "2014-12-08T13:33:04.774Z"}}
+    ]);
 
     expectToGetDestinationSpace();
 
@@ -184,15 +180,12 @@ describe('Content publication', function () {
   it('should remove an asset on a synchronized space', function (done) {
     createTokenFileWithToken();
 
-    nock('https://cdn.contentful.com:443')
-      .get('/spaces/d3ivyl5chrsd/sync?sync_token=SYNC_TOKEN')
-      .reply(200, {"sys": {"type": "Array"}, "items": [
-        {"sys": {"type": "DeletedEntry", "id": "26GRGDvgvyQ0cswwMscCIc", "space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "revision": 1, "createdAt": "2014-12-04T16:07:55.783Z", "updatedAt": "2014-12-04T16:07:55.783Z", "deletedAt": "2014-12-04T16:07:55.783Z"}}
-      ],
-        "nextSyncUrl": "https://cdn.contentful.com/spaces/d3ivyl5chrsd/sync?sync_token=NEW-SYNC-TOKEN"});
+    expectToGetSourceItemsWithExistingSync([
+      {"sys": {"type": "DeletedEntry", "id": "26GRGDvgvyQ0cswwMscCIc", "space": {"sys": {"type": "Link", "linkType": "Space", "id": "d3ivyl5chrsd"}}, "revision": 1, "createdAt": "2014-12-04T16:07:55.783Z", "updatedAt": "2014-12-04T16:07:55.783Z", "deletedAt": "2014-12-04T16:07:55.783Z"}}
+    ]);
 
     expectToGetDestinationSpace();
-    
+
     nock('https://api.contentful.com:443')
       .delete('/spaces/2udq9e16iv3p/assets/6HTjuv5pqogeMcoysSGuqk/published?access_token=614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702')
       .reply(200, {"fields": {"file": {"en-US": {"fileName": "Capture d’écran 2014-12-05 à 16.58.59.png", "contentType": "image/png", "details": {"image": {"width": 1974, "height": 902}, "size": 189987}, "url": "//images.contentful.com/d3ivyl5chrsd/6HTjuv5pqogeMcoysSGuqk/c04bfe84f50559b1b8d38c42dab157b3/Capture_d__cran_2014-12-05___16.58.59.png"}}, "title": {"en-US": "Capture d’écran 2014-12-05 à 16.58.59"}}, "sys": {"id": "6HTjuv5pqogeMcoysSGuqk", "type": "Asset", "createdAt": "2014-12-08T14:36:28.594Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "2udq9e16iv3p"}}, "firstPublishedAt": "2014-12-08T14:36:29.518Z", "publishedCounter": 1, "version": 3, "updatedAt": "2014-12-08T14:36:54.670Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
