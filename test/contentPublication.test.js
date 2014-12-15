@@ -44,7 +44,6 @@ describe('Content publication', function () {
 
   var publishContent = function(done) {
     var sync = Sync.fromConfig(config);
-    sync.verbose = true;
     sync.run().then(function () {
       done();
     }).catch(function (err) {

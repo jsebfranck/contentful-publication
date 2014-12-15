@@ -18,7 +18,6 @@ switch (type) {
     modelSync.run();
     break;
   case 'content' :
-    sync.verbose = config.verbose;
     sync.run();
     break;
   default:
