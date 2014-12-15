@@ -9,7 +9,7 @@ var ContentSync = require('../lib/Sync'),
 
 var config = JSON.parse(fs.readFileSync(argv.c)),
   sync = ContentSync.fromConfig(config),
-  modelSync = new ModelSync(config.contentful);
+  modelSync = new ModelSync(config);
 
 var type = argv.t ? argv.t : '';
 

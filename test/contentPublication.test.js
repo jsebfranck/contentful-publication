@@ -8,6 +8,7 @@ describe('Content publication', function () {
 
   this.timeout(30000);
   var config = {
+    "tokenFilename": 'lastSyncTokenTest.json',
     "contentful": {
       "sourceAccessToken": "TOKEN_SRC",
       "sourceSpace": "SPACE_SRC",
@@ -28,11 +29,11 @@ describe('Content publication', function () {
   */
 
   var createEmptyTokenFile = function () {
-    fs.writeFileSync('lastSyncToken.json', JSON.stringify({}));
+    fs.writeFileSync(config.tokenFilename, JSON.stringify({}));
   };
 
   var createTokenFileWithToken = function () {
-    fs.writeFileSync('lastSyncToken.json', JSON.stringify({ url: 'https://cdn.contentful.com:443/spaces/SPACE_SRC/sync?sync_token=SYNC_TOKEN' }));
+    fs.writeFileSync(config.tokenFilename, JSON.stringify({ url: 'https://cdn.contentful.com:443/spaces/SPACE_SRC/sync?sync_token=SYNC_TOKEN' }));
   };
 
   //nock.recorder.rec();
