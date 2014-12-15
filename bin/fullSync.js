@@ -21,7 +21,8 @@ switch (type) {
     sync.run();
     break;
   default:
-    modelSync.run();
-    sync.run();
+    modelSync.run().then(function() {
+      sync.run();
+    });
     break;
 }

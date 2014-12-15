@@ -2,7 +2,8 @@
 
 - Tests : finish content sync tests
 - Perf : don't retrieve the space for each item to synchronize
-- store last token in s3
+- store last token in s3?
+- don't update content models if nothing changed
 
 ### How to use
 
