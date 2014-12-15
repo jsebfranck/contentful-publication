@@ -1,6 +1,7 @@
 ### TODO
 
-- tests
+- test for two sync requests
+- tests for content model
 - don't retrieve the space for each item to synchronize
 - one script to synchronize model and contents
 - store last token in s3
