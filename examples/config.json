@@ -1,8 +1,8 @@
 {
   "contentful": {
-    "accessToken": "",
-    "spaceSource": "",
-    "accessTokenDestination": "",
-    "spaceDestination": ""
+    "sourceSpace": "",
+    "sourceAccessToken": "",
+    "destinationSpace": "",
+    "destinationAccessToken": ""
   }
 }

@@ -9,20 +9,20 @@ describe('Content publication', function () {
   this.timeout(30000);
   var config = {
     "contentful": {
-      "accessToken": "TOKEN_SRC",
-      "spaceSource": "SPACE_SRC",
-      "accessTokenDestination": "TOKEN_DEST",
-      "spaceDestination": "SPACE_DEST"
+      "sourceAccessToken": "TOKEN_SRC",
+      "sourceSpace": "SPACE_SRC",
+      "destinationAccessToken": "TOKEN_DEST",
+      "destinationSpace": "SPACE_DEST"
     }
   };
 
   /*
   var config = {
     "contentful": {
-      "accessToken": "fb515830ae5e9b6684cc89044ddc6fe91d17eb6a5ed68491be1e75b5abe02212",
-      "spaceSource": "d3ivyl5chrsd",
-      "accessTokenDestination": "614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702",
-      "spaceDestination": "2udq9e16iv3p"
+      "sourceAccessToken": "fb515830ae5e9b6684cc89044ddc6fe91d17eb6a5ed68491be1e75b5abe02212",
+      "sourceSpace": "d3ivyl5chrsd",
+      "destinationAccessToken": "614a7d5c05162a3879c55fe3f00d7115e1718efcd6dd969efeba01cc26a5a702",
+      "destinationSpace": "2udq9e16iv3p"
     }
   };
   */

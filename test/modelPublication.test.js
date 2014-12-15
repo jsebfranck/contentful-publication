@@ -7,10 +7,10 @@ describe('Model publication', function () {
 
   var config = {
     'contentful': {
-      'accessToken': 'SRC_TOKEN',
-      'spaceSource': 'SRC_SPACE',
-      'accessTokenDestination': 'DEST_TOKEN',
-      'spaceDestination': 'DEST_SPACE'
+      'sourceAccessToken': 'SRC_TOKEN',
+      'sourceSpace': 'SRC_SPACE',
+      'destinationAccessToken': 'DEST_TOKEN',
+      'destinationSpace': 'DEST_SPACE'
     }
   };
 
