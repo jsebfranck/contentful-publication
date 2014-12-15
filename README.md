@@ -9,3 +9,8 @@
 - winston
 - replace bluebird by Q
 - replace questor by request
+
+### How to use
+
+- create config file like the example
+- node ./bin/fullSync.js -c path/to/config -t content|model|nothing
