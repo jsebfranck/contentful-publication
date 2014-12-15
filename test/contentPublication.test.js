@@ -43,8 +43,9 @@ describe('Content publication', function () {
     createEmptyTokenFile();
   });
 
-  var publishContent = function(done) {
+  var executeSync = function(done) {
     var sync = Sync.fromConfig(config);
+    sync.verbose = true;
     sync.run().then(function () {
       done();
     }).catch(function (err) {
@@ -64,10 +65,24 @@ describe('Content publication', function () {
       .reply(200, {"sys": {"type": "Array"}, "items": items,
         "nextSyncUrl": "https://cdn.contentful.com/spaces/SPACE_SRC/sync?sync_token=NEXT-SYNC-TOKEN"});
   };
-
-  var expectToGetSourceItemsWithExistingSync = function(items) {
+  var expectToGetSourceItemsWithInitialSyncAndPageUrl = function (items) {
     nock('https://cdn.contentful.com:443')
-      .get('/spaces/SPACE_SRC/sync?sync_token=SYNC_TOKEN')
+      .get('/spaces/SPACE_SRC/sync?initial=true')
+      .reply(200, {"sys": {"type": "Array"}, "items": items,
+        "nextPageUrl": "https://cdn.contentful.com/spaces/SPACE_SRC/sync?sync_token=NEXT-SYNC-TOKEN&access_token=TOKEN_SRC"});
+  };
+
+  var expectToGetSourceItemsWithExistingSyncAndPageUrl = function(items) {
+    nock('https://cdn.contentful.com:443')
+      .get('/spaces/SPACE_SRC/sync?sync_token=NEXT-SYNC-TOKEN&access_token=TOKEN_SRC')
+      .reply(200, {"sys": {"type": "Array"}, "items": items,
+        "nextSyncUrl": "https://cdn.contentful.com/spaces/SPACE_SRC/sync?sync_token=NEXT-SYNC-TOKEN&access_token=TOKEN_SRC"});
+  };
+
+  var expectToGetSourceItemsWithExistingSync = function (items, syncToken) {
+    syncToken = syncToken ? syncToken : 'SYNC_TOKEN';
+    nock('https://cdn.contentful.com:443')
+      .get('/spaces/SPACE_SRC/sync?sync_token=' + syncToken)
       .reply(200, {"sys": {"type": "Array"}, "items": items,
         "nextSyncUrl": "https://cdn.contentful.com/spaces/SPACE_SRC/sync?sync_token=NEW-SYNC-TOKEN"});
   };
@@ -75,15 +90,81 @@ describe('Content publication', function () {
   describe('for all contents', function() {
     it('should do nothing if there are no contents to synchronize', function (done) {
       expectToGetSourceItemsWithInitialSync([]);
-      publishContent(done);
+      executeSync(done);
     });
 
-    it('should process contents with two sync requests', function() {
+    it('should process contents with two sync requests', function (done) {
+      expectToGetSourceItemsWithInitialSyncAndPageUrl([
+        {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_SRC"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "2XS1ZMB87KSWAI4o6aOw0G", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"}, "fields": {"contentfulTitle": {"en-US": "1c"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}}
+      ]);
+      expectToGetDestinationSpace();
+
+      nock('https://api.contentful.com:443')
+        .get('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=TOKEN_DEST')
+        .reply(404, {"sys": {"type": "Error", "id": "NotFound"}, "message": "The resource could not be found.", "details": {"type": "Entry", "space": "SPACE_DEST", "id": "2XS1ZMB87KSWAI4o6aOw0G"}});
+
+      nock('https://api.contentful.com:443')
+        .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=TOKEN_DEST', {"fields": {"contentfulTitle": {"en-US": "1a"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}})
+        .reply(201, {"fields": {"contentfulTitle": {"en-US": "12"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "version": 1, "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "updatedAt": "2014-12-04T14:16:58.522Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
+
+      nock('https://api.contentful.com:443')
+        .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G/published?access_token=TOKEN_DEST')
+        .reply(200, {"fields": {"contentfulTitle": {"en-US": "13"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "version": 2, "updatedAt": "2014-12-04T14:16:59.193Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 1, "publishedAt": "2014-12-04T14:16:59.193Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
+
+      expectToGetSourceItemsWithExistingSyncAndPageUrl([
+        {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_SRC"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "2XS1ZMB87KSWAI4o6aOw0G", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"}, "fields": {"contentfulTitle": {"en-US": "1e"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}}
+      ]);
+      expectToGetDestinationSpace();
+      nock('https://api.contentful.com:443')
+        .get('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=TOKEN_DEST')
+        .reply(404, {"sys": {"type": "Error", "id": "NotFound"}, "message": "The resource could not be found.", "details": {"type": "Entry", "space": "SPACE_DEST", "id": "2XS1ZMB87KSWAI4o6aOw0G"}});
+
+      nock('https://api.contentful.com:443')
+        .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=TOKEN_DEST', {"fields": {"contentfulTitle": {"en-US": "1b"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}})
+        .reply(201, {"fields": {"contentfulTitle": {"en-US": "14"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "version": 1, "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "updatedAt": "2014-12-04T14:16:58.522Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
+
+      nock('https://api.contentful.com:443')
+        .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G/published?access_token=TOKEN_DEST')
+        .reply(200, {"fields": {"contentfulTitle": {"en-US": "15"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "version": 2, "updatedAt": "2014-12-04T14:16:59.193Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 1, "publishedAt": "2014-12-04T14:16:59.193Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
+
+      executeSync(done);
 
     });
 
-    it('should process one entry and one asset', function() {
+    it('should process one entry and one asset', function (done) {
+      expectToGetSourceItemsWithInitialSync([
+        {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_SRC"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "2XS1ZMB87KSWAI4o6aOw0G", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"}, "fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}},
+          {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/SPACE_SRC/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_SRC"}}, "type": "Asset", "id": "9WwNj5BjrOwawsOuAIIce", "revision": 1, "createdAt": "2014-12-04T16:46:25.594Z", "updatedAt": "2014-12-04T16:46:25.594Z"}}
+      ]);
 
+      expectToGetDestinationSpace();
+
+      nock('https://api.contentful.com:443')
+        .get('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=TOKEN_DEST')
+        .reply(404, {"sys": {"type": "Error", "id": "NotFound"}, "message": "The resource could not be found.", "details": {"type": "Entry", "space": "SPACE_DEST", "id": "2XS1ZMB87KSWAI4o6aOw0G"}});
+
+      nock('https://api.contentful.com:443')
+        .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=TOKEN_DEST', {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}})
+        .reply(201, {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "version": 1, "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "updatedAt": "2014-12-04T14:16:58.522Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
+
+      nock('https://api.contentful.com:443')
+        .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G/published?access_token=TOKEN_DEST')
+        .reply(200, {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "version": 2, "updatedAt": "2014-12-04T14:16:59.193Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 1, "publishedAt": "2014-12-04T14:16:59.193Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
+
+      expectToGetDestinationSpace();
+      nock('https://api.contentful.com:443')
+        .get('/spaces/SPACE_DEST/assets/9WwNj5BjrOwawsOuAIIce?access_token=TOKEN_DEST')
+        .reply(404, {"sys": {"type": "Error", "id": "NotFound"}, "message": "The resource could not be found.", "details": {"type": "Asset", "space": "SPACE_DEST", "id": "9WwNj5BjrOwawsOuAIIce"}});
+
+      nock('https://api.contentful.com:443')
+        .put('/spaces/SPACE_DEST/assets/9WwNj5BjrOwawsOuAIIce?access_token=TOKEN_DEST', {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/SPACE_SRC/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_SRC"}}, "type": "Asset", "id": "9WwNj5BjrOwawsOuAIIce", "revision": 1, "createdAt": "2014-12-04T16:46:25.594Z", "updatedAt": "2014-12-04T16:46:25.594Z"}})
+        .reply(201, {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/SPACE_SRC/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"id": "9WwNj5BjrOwawsOuAIIce", "type": "Asset", "version": 1, "createdAt": "2014-12-04T16:47:12.954Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "updatedAt": "2014-12-04T16:47:12.954Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
+
+      nock('https://api.contentful.com:443')
+        .put('/spaces/SPACE_DEST/assets/9WwNj5BjrOwawsOuAIIce/published?access_token=TOKEN_DEST')
+        .reply(200, {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/SPACE_SRC/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"id": "9WwNj5BjrOwawsOuAIIce", "type": "Asset", "createdAt": "2014-12-04T16:47:12.954Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "version": 2, "updatedAt": "2014-12-04T16:47:13.693Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T16:47:13.693Z", "publishedCounter": 1, "publishedAt": "2014-12-04T16:47:13.693Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
+
+      executeSync(done);
     });
   });
 
@@ -107,7 +188,7 @@ describe('Content publication', function () {
         .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G/published?access_token=TOKEN_DEST')
         .reply(200, {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "version": 2, "updatedAt": "2014-12-04T14:16:59.193Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 1, "publishedAt": "2014-12-04T14:16:59.193Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
 
-      publishContent(done);
+      executeSync(done);
     });
 
 
@@ -130,7 +211,7 @@ describe('Content publication', function () {
         .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G/published?access_token=TOKEN_DEST')
         .reply(200, {"fields": {"contentfulTitle": {"en-US": "12"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 2, "publishedAt": "2014-12-04T14:44:31.005Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 3, "version": 4, "updatedAt": "2014-12-04T14:44:31.005Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
 
-      publishContent(done);
+      executeSync(done);
     });
 
     it('should remove an entry on a synchronized space', function (done) {
@@ -150,7 +231,7 @@ describe('Content publication', function () {
         .delete('/spaces/SPACE_DEST/entries/26GRGDvgvyQ0cswwMscCIc?access_token=TOKEN_DEST')
         .reply(204, "");
 
-      publishContent(done);
+      executeSync(done);
     });
   });
 
@@ -175,7 +256,7 @@ describe('Content publication', function () {
         .put('/spaces/SPACE_DEST/assets/9WwNj5BjrOwawsOuAIIce/published?access_token=TOKEN_DEST')
         .reply(200, {"fields": {"file": {"en-US": {"fileName": "add_directory_icon.svg", "contentType": "image/svg+xml", "details": {"size": 984}, "url": "//assets.contentful.com/SPACE_SRC/9WwNj5BjrOwawsOuAIIce/1365a0d50dbb810b731a815c9a579ad0/add_directory_icon.svg"}}, "title": {"en-US": "add directory icon"}}, "sys": {"id": "9WwNj5BjrOwawsOuAIIce", "type": "Asset", "createdAt": "2014-12-04T16:47:12.954Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "version": 2, "updatedAt": "2014-12-04T16:47:13.693Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T16:47:13.693Z", "publishedCounter": 1, "publishedAt": "2014-12-04T16:47:13.693Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
 
-      publishContent(done);
+      executeSync(done);
     });
 
     it('should update an asset on a unsynchronized space', function (done) {
@@ -198,7 +279,7 @@ describe('Content publication', function () {
         .put('/spaces/SPACE_DEST/assets/1P3ydRWdSwcmEIQkeGySAo/published?access_token=TOKEN_DEST')
         .reply(200, {"fields": {"file": {"en-US": {"fileName": "2014_03_05_XEBIA_16_FINAL_1.jpg", "contentType": "image/jpeg", "details": {"image": {"width": 4791, "height": 2695}, "size": 7378737}, "url": "//images.contentful.com/SPACE_SRC/1P3ydRWdSwcmEIQkeGySAo/975718ead2ad44d685075d46f349f18a/2014_03_05_XEBIA_16_FINAL_1.jpg"}}, "title": {"en-US": "Xebia 2"}}, "sys": {"id": "1P3ydRWdSwcmEIQkeGySAo", "type": "Asset", "createdAt": "2014-12-05T09:29:24.883Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "firstPublishedAt": "2014-12-05T09:29:25.562Z", "publishedCounter": 6, "publishedAt": "2014-12-08T13:46:35.122Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 11, "version": 12, "updatedAt": "2014-12-08T13:46:35.122Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
 
-      publishContent(done);
+      executeSync(done);
     });
 
     it('should remove an asset on a synchronized space', function (done) {
@@ -218,7 +299,7 @@ describe('Content publication', function () {
         .delete('/spaces/SPACE_DEST/assets/6HTjuv5pqogeMcoysSGuqk?access_token=TOKEN_DEST')
         .reply(204, "");
 
-      publishContent(done);
+      executeSync(done);
     });
   });
 });
