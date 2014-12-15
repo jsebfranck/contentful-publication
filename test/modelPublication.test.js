@@ -17,7 +17,7 @@ describe('Model publication', function () {
   nock.disableNetConnect();
 
   var synchronizeModels = function (done) {
-    var modelSync = new ModelSync(config.contentful);
+    var modelSync = new ModelSync(config);
     modelSync.run().then(function () {
       done();
     }).catch(function (err) {
