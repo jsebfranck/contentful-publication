@@ -2,9 +2,8 @@
   "tokenFilename": "",
   "contentful": {
     "sourceSpace": "",
-    "sourceAccessToken": "",
+    "sourceContentDeliveryToken": "",
     "destinationSpace": "",
-    "destinationAccessToken": "",
     "contentManagementAccessToken": ""
   }
 }
