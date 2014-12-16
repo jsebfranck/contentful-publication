@@ -4,6 +4,7 @@
     "sourceSpace": "",
     "sourceAccessToken": "",
     "destinationSpace": "",
-    "destinationAccessToken": ""
+    "destinationAccessToken": "",
+    "contentManagementAccessToken": ""
   }
 }
