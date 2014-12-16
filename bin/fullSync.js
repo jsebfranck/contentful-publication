@@ -2,13 +2,13 @@
 
 'use strict';
 
-var ContentSync = require('../lib/Sync'),
+var ContentSync = require('../lib/ContentSync'),
   ModelSync = require('../lib/ModelSync'),
   argv = require('minimist')(process.argv.slice(2)),
   fs = require('fs');
 
 var config = JSON.parse(fs.readFileSync(argv.c)),
-  sync = ContentSync.fromConfig(config),
+  contentSync = ContentSync.fromConfig(config),
   modelSync = new ModelSync(config);
 
 var type = argv.t ? argv.t : '';
@@ -18,11 +18,11 @@ switch (type) {
     modelSync.run();
     break;
   case 'content' :
-    sync.run();
+    contentSync.run();
     break;
   default:
     modelSync.run().then(function() {
-      sync.run();
+      contentSync.run();
     });
     break;
 }

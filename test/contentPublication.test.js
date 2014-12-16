@@ -2,7 +2,7 @@
 
 var nock = require('nock'),
   fs = require('fs'),
-  Sync = require('../lib/Sync');
+  ContentSync = require('../lib/ContentSync');
 
 describe('Content publication', function () {
 
@@ -44,7 +44,7 @@ describe('Content publication', function () {
   });
 
   var executeSync = function(done) {
-    var sync = Sync.fromConfig(config);
+    var sync = ContentSync.fromConfig(config);
     sync.verbose = true;
     sync.run().then(function () {
       done();
