@@ -114,7 +114,7 @@ describe('Content publication', function () {
       expectToGetSourceItemsWithExistingSyncAndPageUrl([
         {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_SRC"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "2XS1ZMB87KSWAI4o6aOw0G", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"}, "fields": {"contentfulTitle": {"en-US": "1e"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}}
       ]);
-      expectToGetDestinationSpace();
+
       nock('https://api.contentful.com:443')
         .get('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G?access_token=TOKEN_DEST')
         .reply(404, {"sys": {"type": "Error", "id": "NotFound"}, "message": "The resource could not be found.", "details": {"type": "Entry", "space": "SPACE_DEST", "id": "2XS1ZMB87KSWAI4o6aOw0G"}});
@@ -151,7 +151,6 @@ describe('Content publication', function () {
         .put('/spaces/SPACE_DEST/entries/2XS1ZMB87KSWAI4o6aOw0G/published?access_token=TOKEN_DEST')
         .reply(200, {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "2XS1ZMB87KSWAI4o6aOw0G", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "version": 2, "updatedAt": "2014-12-04T14:16:59.193Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 1, "publishedAt": "2014-12-04T14:16:59.193Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
 
-      expectToGetDestinationSpace();
       nock('https://api.contentful.com:443')
         .get('/spaces/SPACE_DEST/assets/9WwNj5BjrOwawsOuAIIce?access_token=TOKEN_DEST')
         .reply(404, {"sys": {"type": "Error", "id": "NotFound"}, "message": "The resource could not be found.", "details": {"type": "Asset", "space": "SPACE_DEST", "id": "9WwNj5BjrOwawsOuAIIce"}});
