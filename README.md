@@ -20,3 +20,4 @@ Tool to synchronize model, entries and assets between two Contentful spaces.
 
 - store last token in s3?
 - don't update content models if nothing changed
+- Quality : add jshint
