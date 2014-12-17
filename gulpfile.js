@@ -13,4 +13,4 @@ gulp.task("test", function() {
   return gulp.src('test/*.*', {read: false})
     .pipe(mocha({reporter: 'nyan'}));
 })
-gulp.task("default", ["jshint"]);
+gulp.task("default", ["jshint", "test"]);
