@@ -6,7 +6,7 @@ var nock = require('nock'),
 
 describe('Content publication', function () {
 
-  this.timeout(30000);
+  //this.timeout(30000);
   var config = {
     "tokenFilename": 'lastSyncTokenTest.json',
     "contentful": {
