@@ -5,6 +5,7 @@
 var ContentSync = require('../lib/ContentSync'),
   ModelSync = require('../lib/ModelSync'),
   argv = require('minimist')(process.argv.slice(2)),
+  logger = require('../lib/logger'),
   fs = require('fs');
 
 var config = JSON.parse(fs.readFileSync(argv.c)),
@@ -15,14 +16,34 @@ var type = argv.t ? argv.t : '';
 
 switch (type) {
   case 'model':
-    modelSync.run();
+    modelSync.run()
+      .then(function () {
+        logger.info('Synchronization is over');
+      })
+      .catch(function (error) {
+        logger.error('Synchronization error ', error);
+      });
+    ;
     break;
   case 'content' :
-    contentSync.run();
+    contentSync.run()
+      .then(function () {
+        logger.info('Synchronization is over');
+      })
+      .catch(function (error) {
+        logger.error('Synchronization error ', error);
+      });
     break;
   default:
-    modelSync.run().then(function() {
-      contentSync.run();
-    });
+    modelSync.run()
+      .then(function () {
+        return contentSync.run();
+      })
+      .then(function () {
+        logger.info('Synchronization is over');
+      })
+      .catch(function (error) {
+        logger.error('Synchronization error ', error);
+      });
     break;
 }
