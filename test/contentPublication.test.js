@@ -170,6 +170,30 @@ describe('Content publication', function () {
       executeSync(done);
     });
 
+    it('should add new entry to the unsynchronized space with the second publish action', function (done) {
+      expectToGetSourceItemsWithInitialSync([
+        {"sys": {"space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_SRC"}}, "type": "Entry", "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "id": "ENTRY_ID", "revision": 1, "createdAt": "2014-12-04T14:13:50.630Z", "updatedAt": "2014-12-04T14:13:50.630Z"},
+          "fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}}
+      ]);
+
+      expectToGetDestinationSpace();
+
+      contentfulApiNock.get('/spaces/SPACE_DEST/entries/ENTRY_ID?access_token=CONTENT_MGT_TOKEN')
+        .reply(404, {"sys": {"type": "Error", "id": "NotFound"}, "message": "The resource could not be found.", "details": {"type": "Entry", "space": "SPACE_DEST", "id": "ENTRY_ID"}});
+
+      contentfulApiNock.put('/spaces/SPACE_DEST/entries/ENTRY_ID?access_token=CONTENT_MGT_TOKEN', {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}})
+        .reply(201, {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "ENTRY_ID", "type": "Entry", "version": 1, "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "updatedAt": "2014-12-04T14:16:58.522Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
+
+      contentfulApiNock.put('/spaces/SPACE_DEST/entries/ENTRY_ID/published?access_token=CONTENT_MGT_TOKEN')
+        .once()
+        .reply(500, {"name":"ValidationFailed","message":"PUT https://api.contentful.com:443/spaces/zla0uhbybqqb/entries/5zcug30nrGcSY0w8QmWUA6/published?access_token=c734d029c0375ef9cda101d2667b6fcc4c1884451dab7ea46314af8b61ec413b Validation error {\"sys\":{\"type\":\"Error\",\"id\":\"ValidationFailed\"},\"message\":\"Validation error\",\"details\":{\"errors\":[{\"name\":\"notResolvable\",\"link\":{\"type\":\"Link\",\"linkType\":\"Asset\",\"id\":\"68WwcC4go0sKqiIWmmk6gc\"}}]}}","request":{"method":"PUT","uri":"https://api.contentful.com:443/spaces/zla0uhbybqqb/entries/5zcug30nrGcSY0w8QmWUA6/published?access_token=c734d029c0375ef9cda101d2667b6fcc4c1884451dab7ea46314af8b61ec413b"}});
+
+      contentfulApiNock.put('/spaces/SPACE_DEST/entries/ENTRY_ID/published?access_token=CONTENT_MGT_TOKEN')
+        .reply(200, {"fields": {"contentfulTitle": {"en-US": "1"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "ENTRY_ID", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "version": 2, "updatedAt": "2014-12-04T14:16:59.193Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 1, "publishedAt": "2014-12-04T14:16:59.193Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 1}});
+
+      executeSync(done);
+    });
+
 
     it('should update an entry on the unsynchronized space', function (done) {
       expectToGetSourceItemsWithInitialSync([
@@ -186,6 +210,24 @@ describe('Content publication', function () {
 
       contentfulApiNock.put('/spaces/SPACE_DEST/entries/ENTRY-ID/published?access_token=CONTENT_MGT_TOKEN')
         .reply(200, {"fields": {"contentfulTitle": {"en-US": "12"}, "message": {"en-US": "2"}, "number": {"en-US": 3}, "text": {"en-US": "4"}}, "sys": {"id": "ENTRY-ID", "type": "Entry", "createdAt": "2014-12-04T14:16:58.522Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "firstPublishedAt": "2014-12-04T14:16:59.193Z", "publishedCounter": 2, "publishedAt": "2014-12-04T14:44:31.005Z", "publishedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "publishedVersion": 3, "version": 4, "updatedAt": "2014-12-04T14:44:31.005Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
+
+      executeSync(done);
+    });
+
+    it('should remove an entry on a synchronized space', function (done) {
+      createTokenFileWithToken();
+
+      expectToGetSourceItemsWithExistingSync([
+        {"sys": {"type": "DeletedEntry", "id": "ENTRY-ID", "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_SRC"}}, "revision": 1, "createdAt": "2014-12-04T16:07:55.783Z", "updatedAt": "2014-12-04T16:07:55.783Z", "deletedAt": "2014-12-04T16:07:55.783Z"}}
+      ]);
+
+      expectToGetDestinationSpace();
+
+      contentfulApiNock.delete('/spaces/SPACE_DEST/entries/ENTRY-ID/published?access_token=CONTENT_MGT_TOKEN')
+        .reply(200, {"fields": {"contentfulTitle": {"en-US": "123123"}, "message": {"en-US": "A"}, "number": {"en-US": 3}, "text": {"en-US": "21"}}, "sys": {"id": "ENTRY-ID", "type": "Entry", "createdAt": "2014-12-04T16:07:35.207Z", "createdBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}, "space": {"sys": {"type": "Link", "linkType": "Space", "id": "SPACE_DEST"}}, "contentType": {"sys": {"type": "Link", "linkType": "ContentType", "id": "1d4hSJN1CiACKao6G0QyKC"}}, "firstPublishedAt": "2014-12-04T16:07:35.933Z", "publishedCounter": 1, "version": 3, "updatedAt": "2014-12-04T16:08:05.573Z", "updatedBy": {"sys": {"type": "Link", "linkType": "User", "id": "54d2tbbHxWntLgXUA6O72y"}}}});
+
+      contentfulApiNock.delete('/spaces/SPACE_DEST/entries/ENTRY-ID?access_token=CONTENT_MGT_TOKEN')
+        .reply(204, "");
 
       executeSync(done);
     });
