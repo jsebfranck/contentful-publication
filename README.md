@@ -15,11 +15,3 @@ Tool to synchronize model, entries and assets between two Contentful spaces.
 ```
   node ./bin/fullSync.js -c path/to/config -t model
 ```
-
-### TODO
-
-- Publication problem : Contents are not returned in the good order by the Sync API. So some contents could not be published if they have a relationship 
-with another content not returned yet by the Sync API
-- Freeze problem : why the script freezes after more than 1 hour?
-- Bi-directionnal synchronization problem : don't update content models if nothing changed
-- Nice to have : store last token in s3?
