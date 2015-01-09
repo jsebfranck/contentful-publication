@@ -5,7 +5,7 @@ Tool to synchronize model, entries and assets between two Contentful spaces.
 - Create a config file following the example in examples/config.json
 - To synchronize contents and models :
 ```
-  node ./bin/fullSync.js -c path/to/config`
+  node ./bin/fullSync.js -c path/to/config
 ```
 - To synchronize only the contents (entries and assets)
 ```
