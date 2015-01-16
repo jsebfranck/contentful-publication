@@ -8,6 +8,20 @@ var ContentSync = require('../lib/ContentSync'),
   logger = require('../lib/logger'),
   fs = require('fs');
 
+if (!argv.c || argv.help || argv.h) {
+  console.log([
+    'USAGE: contentful-publication -c <CONFIG_FILE> [OPTIONS]',
+    '',
+    'Options:',
+    '',
+    '  -t          Select the type of data to sync. "model" will only copy',
+    '              content types while "content" will sync entries and assets.',
+    '',
+    '  -h, --help  Show this help.'
+  ].join('\n'));
+  process.exit(argv.c ? 0 : 1);
+}
+
 var config = JSON.parse(fs.readFileSync(argv.c)),
   contentSync = ContentSync.fromConfig(config),
   modelSync = new ModelSync(config);
