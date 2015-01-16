@@ -15,6 +15,7 @@
       "name": "Jérémy VINAI"
     }
   ],
+  "bin": "./bin/fullSync.js",
   "dependencies": {
     "bluebird": "~0.11.6-0",
     "contentful-management": "^0.1.1",
@@ -22,7 +23,7 @@
     "minimist": "0.0.8",
     "nano": "5.7.1",
     "q": "^1.1.2",
-    "questor": "git://github.com/ehd/questor#v1.0.0-alpha.3",
+    "questor": "^1.0.0",
     "winston": "^0.8.3"
   },
   "devDependencies": {
