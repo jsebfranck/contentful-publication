@@ -6,14 +6,15 @@ var nock = require('nock'),
 
 describe('Content publication', function () {
 
-  //this.timeout(30000);
+  this.timeout(10000);
   var config = {
     "tokenFilename": 'lastSyncTokenTest.json',
     "contentful": {
       "sourceSpace": "SPACE_SRC",
       "sourceContentDeliveryToken": "SRC_DELIVERY_TOKEN",
       "destinationSpace": "SPACE_DEST",
-      "contentManagementAccessToken": "CONTENT_MGT_TOKEN"
+      "contentManagementAccessToken": "CONTENT_MGT_TOKEN",
+      "publishRetryDelay": 1000
     }
   };
 

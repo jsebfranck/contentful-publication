@@ -5,11 +5,13 @@ var nock = require('nock'),
 
 describe('Model publication', function () {
 
+  this.timeout(10000);
   var config = {
     'contentful': {
       'sourceSpace': 'SRC_SPACE',
       'destinationSpace': 'DEST_SPACE',
-      'contentManagementAccessToken': 'TOKEN_MANAGEMENT'
+      'contentManagementAccessToken': 'TOKEN_MANAGEMENT',
+      "publishRetryDelay": 1000
     }
   };
 

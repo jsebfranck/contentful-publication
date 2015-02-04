@@ -4,6 +4,7 @@
     "sourceSpace": "",
     "sourceContentDeliveryToken": "",
     "destinationSpace": "",
-    "contentManagementAccessToken": ""
+    "contentManagementAccessToken": "",
+    "publishRetryDelay": 30000
   }
 }
