@@ -1,3 +1,7 @@
+# contentful-publication
+
+[![Build Status](https://travis-ci.org/jsebfranck/contentful-publication.svg?branch=master)](https://travis-ci.org/jsebfranck/contentful-publication.js)
+
 Tool to synchronize model, entries and assets between two Contentful spaces.
 
 ### Install
