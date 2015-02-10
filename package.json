@@ -1,6 +1,6 @@
 {
   "name": "contentful-publication",
-  "version": "0.0.1",
+  "version": "0.9.0",
   "description": "Allow to synchronize space content with another space",
   "license": "MIT",
   "repository": {
