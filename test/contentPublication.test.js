@@ -2,7 +2,8 @@
 
 var nock = require('nock'),
   fs = require('fs'),
-  ContentSync = require('../lib/ContentSync');
+  testHelper = require('./testHelper'),
+  ContentSync = testHelper.requireModule('ContentSync');
 
 describe('Content publication', function () {
 

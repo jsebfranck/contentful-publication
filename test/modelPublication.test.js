@@ -1,7 +1,8 @@
 'use strict';
 
 var nock = require('nock'),
-  ModelSync = require('../lib/ModelSync');
+  testHelper = require('./testHelper'),
+  ModelSync = testHelper.requireModule('ModelSync');
 
 describe('Model publication', function () {
 
