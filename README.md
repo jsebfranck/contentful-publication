@@ -1,4 +1,8 @@
-# contentful-publication
+# DEPRECATED
+
+You should now use [https://github.com/contentful/contentful-space-sync](https://github.com/contentful/contentful-space-sync)
+
+## contentful-publication
 
 [![Build Status](https://travis-ci.org/jsebfranck/contentful-publication.svg?branch=master)](https://travis-ci.org/jsebfranck/contentful-publication.js)
 [![Coverage Status](https://coveralls.io/repos/jsebfranck/contentful-publication/badge.svg)](https://coveralls.io/r/jsebfranck/contentful-publication)
